@@ -39,7 +39,7 @@ These capabilities are planned and subject to change.
 |---|---|---|
 | [Decepticon](https://github.com/BitterSecurity/Decepticon) | Red Team | Autonomous Hacking Agent for Red Team |
 | **AutoBot** | Blue Team | Autonomous Defense Agent for Blue Team |
-| [Cybertron](https://github.com/BitterSecurity/Cybertron) | Unified Security | Autonomous Cyber Defense for Humanity |
+| [Cybertron](https://github.com/BitterSecurity/Cybertron) | Unified Security Intelligence | Autonomous Security Intelligence for Humanity |
 
 AutoBot is envisioned as an independent defensive security agent.
 
@@ -59,4 +59,4 @@ To be determined.
 
 ---
 
-**BitterSecurity — Autonomous Cyber Defense for Humanity.**
+**BitterSecurity — Autonomous Security Intelligence for Humanity.**
