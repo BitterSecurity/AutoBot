@@ -1,67 +1,62 @@
 # AutoBot
 
-**Your Personal AI Blue Team Assistant.**
+**Autonomous Defense Agent for Blue Team**
 
-> **Status: Planned — Not Yet Implemented**
+> **Project Status: Planned — Coming Soon**
 
-AutoBot is an upcoming open-source project by [BitterSecurity](https://github.com/BitterSecurity), envisioned as a personal AI assistant for defensive cybersecurity operations.
+AutoBot is an upcoming open-source autonomous defensive security agent by [BitterSecurity](https://github.com/BitterSecurity).
 
-Designed as the defensive counterpart to [Decepticon](https://github.com/BitterSecurity/Decepticon), AutoBot aims to help security professionals investigate threats, analyze security events, and automate defensive workflows through natural language.
+Designed as the defensive counterpart to [Decepticon](https://github.com/BitterSecurity/Decepticon), AutoBot aims to become a personal AI assistant for cybersecurity professionals, supporting threat detection, security investigation, incident response, and defensive automation.
 
 ## Vision
 
-Security operations should be more accessible, intelligent, and autonomous.
+**Detect. Defend. Respond. Evolve.**
 
-AutoBot envisions an AI-native defensive security assistant that works alongside security researchers, analysts, and engineers — supporting investigations, reducing repetitive work, and helping teams respond to emerging threats.
+We envision a future where defensive security is intelligent, accessible, and autonomous.
+
+AutoBot aims to go beyond traditional conversational AI assistants by enabling AI agents to reason about security threats, interact with security tools, and assist with real-world defensive operations.
+
+Our goal is to make advanced defensive security capabilities accessible to individual researchers, security engineers, and organizations.
 
 ## Planned Capabilities
 
-The following capabilities are conceptual and subject to change:
-
-- **Threat Intelligence** — Research vulnerabilities, indicators of compromise, and emerging threats.
-- **Threat Hunting** — Assist with identifying suspicious behavior and potential attack patterns.
-- **Security Investigation** — Analyze security logs, alerts, and relevant evidence.
-- **Detection Engineering** — Assist with developing and refining detection rules.
+- **Personal AI Security Assistant** — A conversational AI companion for defensive cybersecurity tasks.
+- **Threat Intelligence** — Research vulnerabilities, indicators of compromise (IOCs), and emerging threats.
+- **Threat Hunting** — Investigate suspicious activity and identify potential attack patterns.
+- **Security Investigation** — Analyze security events, logs, alerts, and evidence.
+- **Detection Engineering** — Assist with developing and improving detection rules.
 - **Incident Response** — Support incident triage, investigation, and response workflows.
-- **Security Automation** — Connect security tools and automate repetitive defensive tasks.
-- **Personal AI Assistant** — Provide a conversational interface for everyday cybersecurity work.
+- **Security Automation** — Integrate with security tools and automate repetitive security operations.
+- **Persistent Security Context** — Explore contextual memory for ongoing investigations and security workflows.
 
-## Decepticon × AutoBot
+These capabilities are planned and subject to change.
 
-Two complementary approaches to autonomous cybersecurity.
+## BitterSecurity Ecosystem
 
-| | Decepticon | AutoBot |
+**Three Projects. One Vision.**
+
+| Project | Domain | Description |
 |---|---|---|
-| Domain | Offensive Security | Defensive Security |
-| Team | Red Team | Blue Team |
-| Focus | Attack Simulation | Threat Detection & Response |
-| Role | Autonomous Red Team Agent Harness | Personal Blue Team AI Assistant |
+| [Decepticon](https://github.com/BitterSecurity/Decepticon) | Red Team | Autonomous Hacking Agent for Red Team |
+| **AutoBot** | Blue Team | Autonomous Defense Agent for Blue Team |
+| [Cybertron](https://github.com/BitterSecurity/Cybertron) | Unified Security | Autonomous Cyber Defense for Humanity |
 
-### Toward Autonomous Purple Teaming
+AutoBot is envisioned as an independent defensive security agent.
 
-Our long-term vision is to explore how offensive and defensive AI systems can work together.
-
-**Decepticon → AutoBot → Continuous Security Improvement**
-
-By connecting attack simulation with detection, response, and validation, we aim to explore a continuous feedback loop between offensive and defensive security.
+In the long term, it may integrate with Cybertron to enable collaborative offensive and defensive security operations alongside Decepticon.
 
 ## Project Status
 
 AutoBot is currently in the planning stage.
 
-No implementation, installation instructions, or release timeline are available yet.
+No functional implementation or release timeline has been announced.
 
-Architecture, supported integrations, and the initial development roadmap will be shared as the project evolves.
-
-## Related Projects
-
-- [Decepticon](https://github.com/BitterSecurity/Decepticon) — Autonomous Red Team Agent Harness
-- [BitterSecurity](https://github.com/BitterSecurity) — Open-source AI cybersecurity projects
+Architecture, supported integrations, and development milestones will be shared as the project evolves.
 
 ## License
 
-License to be determined.
+To be determined.
 
 ---
 
-**BitterSecurity — Building the future of autonomous cybersecurity.**
+**BitterSecurity — Autonomous Cyber Defense for Humanity.**
