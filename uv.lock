@@ -36,7 +36,7 @@ testing = [
 
 [package.metadata]
 requires-dist = [
-    { name = "decepticon-core", git = "https://github.com/BitterSecurity/Decepticon?subdirectory=packages%2Fdecepticon-core&rev=6243c51640aed28fd68834d05e728f634eb40855" },
+    { name = "decepticon-core", specifier = ">=2.1.0" },
     { name = "opensearch-py", marker = "extra == 'opensearch'", specifier = ">=2,<4" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pytest", marker = "extra == 'testing'", specifier = ">=8.0.0" },
@@ -197,12 +197,16 @@ wheels = [
 
 [[package]]
 name = "decepticon-core"
-version = "0.0.0"
-source = { git = "https://github.com/BitterSecurity/Decepticon?subdirectory=packages%2Fdecepticon-core&rev=6243c51640aed28fd68834d05e728f634eb40855#6243c51640aed28fd68834d05e728f634eb40855" }
+version = "2.1.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ca/53/1c0bcd8f7d4f03cdede85c257938c1a048bdecb20dc00693b43754e58638/decepticon_core-2.1.0.tar.gz", hash = "sha256:76723ae36f117a22b4f0a246a3ccb3438020a1c88f765be9a29481c02ab4146d", size = 368321, upload-time = "2026-10-26T06:22:32.924Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c3/29/f980e39de21996d549c8a782677bff900121bd8310b28bdac9705079ad81/decepticon_core-2.1.0-py3-none-any.whl", hash = "sha256:3fad986ad453128f39cc09c3da147f6725f7bba9252359e1c6f9b04b26c4e20a", size = 372659, upload-time = "2026-10-26T06:22:28.451Z" },
 ]
 
 [[package]]

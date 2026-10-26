@@ -33,11 +33,9 @@ classifiers = [
 # framework runtime — so it installs and runs standalone (a defender need not
 # pull in the offensive agent). Red/Blue are composed by Cybertron on top.
 dependencies = [
-    # The contract layer (OCSF event, EventStoreProtocol, CoverageAdapterProtocol)
-    # merged on main is NOT yet on PyPI (the 2.0.0 release predates it), so the
-    # bootstrap pins a git revision. Flip back to the PyPI dependency once
-    # decepticon-core ships a release containing the contracts.
-    "decepticon-core @ git+https://github.com/BitterSecurity/Decepticon@6243c51640aed28fd68834d05e728f634eb40855#subdirectory=packages/decepticon-core",
+    # 2.1.0 is the first core release carrying the AutoBot contract layer
+    # (OCSF event envelope, EventStoreProtocol, CoverageAdapterProtocol).
+    "decepticon-core>=2.1.0",
     "pydantic>=2.0.0",
 ]
 
@@ -63,11 +61,6 @@ Repository = "https://github.com/BitterSecurity/AutoBot"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.metadata]
-# The bootstrap pins decepticon-core to a git revision (the contract layer is
-# not yet on PyPI); hatchling rejects direct references by default.
-allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["autobot"]
