@@ -1,0 +1,53 @@
+[project]
+name = "autobot-workspace"
+version = "0.0.0"
+description = "AutoBot workspace — autonomous defensive security agent (detect -> investigate -> respond)"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.13"
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.14.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+# The banned-api gate mirrors Decepticon's decepticon-core langchain-free
+# guarantee: the shared contract layer must stay framework-free.
+select = ["E", "F", "I", "W", "TID251"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["autobot", "decepticon_core"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"langchain".msg = "decepticon-core must stay langchain-free (spec §11.4)"
+"langchain_core".msg = "decepticon-core must stay langchain-free (spec §11.4)"
+"langchain_anthropic".msg = "decepticon-core must stay langchain-free (spec §11.4)"
+"langchain_openai".msg = "decepticon-core must stay langchain-free (spec §11.4)"
+"langgraph".msg = "decepticon-core must stay langchain-free (spec §11.4)"
+"deepagents".msg = "decepticon-core must stay langchain-free (spec §11.4)"
+"httpx".msg = "decepticon-core must stay langchain-free (spec §11.4)"
+"fastapi".msg = "decepticon-core must stay langchain-free (spec §11.4)"
+"uvicorn".msg = "decepticon-core must stay langchain-free (spec §11.4)"
+
+[tool.ruff.lint.per-file-ignores]
+# Scope banned-api to the contract layer only — the AutoBot agent runtime
+# (2b) legitimately uses langgraph / httpx.
+"packages/autobot/autobot/triage/**" = ["TID251"]
+"packages/autobot/tests/**" = ["TID251"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+markers = [
+    "slow: integration tests that need a live backend (deselected by default)",
+]
+addopts = "-m 'not slow' -q"
