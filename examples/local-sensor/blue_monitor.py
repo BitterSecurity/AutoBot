@@ -925,7 +925,7 @@ def detect_page(events: list[dict]) -> dict[int, list[tuple[str, str, str]]]:
     result = post_json(
         f"{AGENT_URL}/runs/wait",
         {
-            "assistant_id": "blue_cell",
+            "assistant_id": "autobot",
             "input": {"messages": [{"role": "user", "content": prompt}]},
         },
         timeout=120,
@@ -1142,7 +1142,7 @@ def review_watch_batch(events: list[dict], store: MonitorStore = STORE) -> dict:
     result = post_json(
         f"{AGENT_URL}/threads/{thread_id}/runs/wait",
         {
-            "assistant_id": "blue_cell",
+            "assistant_id": "autobot",
             "if_not_exists": "create",
             "input": {"messages": [{"role": "user", "content": prompt}]},
         },
@@ -1241,7 +1241,7 @@ def analyze_forever() -> None:
             result = post_json(
                 f"{AGENT_URL}/runs/wait",
                 {
-                    "assistant_id": "blue_cell",
+                    "assistant_id": "autobot",
                     "input": {"messages": [{"role": "user", "content": prompt}]},
                 },
                 timeout=180,

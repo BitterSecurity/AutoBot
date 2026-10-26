@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from autobot.agent.blue_cell import (
+from autobot.agent.autobot import (
     build_model,
-    create_blue_cell_agent,
+    create_autobot_agent,
     default_middleware,
     default_tools,
     load_system_prompt,
@@ -36,7 +36,7 @@ def test_default_tools_are_the_five_readonly_sensor_tools() -> None:
 
 
 def test_default_construction_yields_compiled_graph() -> None:
-    graph = create_blue_cell_agent()
+    graph = create_autobot_agent()
     from langgraph.graph.state import CompiledStateGraph
 
     assert isinstance(graph, CompiledStateGraph)
@@ -45,7 +45,7 @@ def test_default_construction_yields_compiled_graph() -> None:
 
 def test_tool_injection_is_respected() -> None:
     tools = [blue_sensor_scan]
-    graph = create_blue_cell_agent(tools=tools)
+    graph = create_autobot_agent(tools=tools)
     assert "tools" in graph.nodes
     # The injected list replaces the default assembly wholesale.
     assert tools == [blue_sensor_scan]
@@ -78,7 +78,5 @@ def test_middleware_injection_is_respected() -> None:
     # A foreign list replaces the default assembly wholesale (the real
     # middleware interface is exercised; a bare object would not survive
     # create_agent's construction-time introspection).
-    graph = create_blue_cell_agent(
-        middleware=[UntrustedOutputMiddleware(), TokenBudgetMiddleware()]
-    )
+    graph = create_autobot_agent(middleware=[UntrustedOutputMiddleware(), TokenBudgetMiddleware()])
     assert "tools" in graph.nodes

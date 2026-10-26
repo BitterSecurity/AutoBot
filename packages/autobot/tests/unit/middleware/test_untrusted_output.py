@@ -342,4 +342,4 @@ class TestQuarantineLedger:
 # NOTE: Decepticon's TestSlotRegistration exercised the framework's
 # middleware-slot registry (DEFAULT_SLOT_FACTORIES / SLOTS_PER_ROLE). AutoBot
 # assembles its middleware list directly (agent-runtime design §middleware);
-# the assembly wiring is tested when the blue_cell graph lands (2b-ii PRs).
+# the assembly wiring is tested when the AutoBot graph lands (2b-ii PRs).

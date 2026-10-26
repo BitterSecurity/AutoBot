@@ -1,7 +1,7 @@
 {
   "dependencies": ["./packages/autobot"],
   "graphs": {
-    "blue_cell": "./packages/autobot/autobot/agent/blue_cell.py:graph"
+    "autobot": "./packages/autobot/autobot/agent/autobot.py:graph"
   },
   "env": ".env",
   "python_version": "3.13",
