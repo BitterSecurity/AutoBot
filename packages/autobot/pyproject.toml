@@ -37,6 +37,13 @@ dependencies = [
     # (OCSF event envelope, EventStoreProtocol, CoverageAdapterProtocol).
     "decepticon-core>=2.1.0",
     "pydantic>=2.0.0",
+    # Agent runtime (Phase 2b-ii): the middleware stack is LangChain-native
+    # (AgentMiddleware), matching the Decepticon agent architecture. The
+    # blue_cell graph stays read-only — no bash, no mutating tools.
+    "langchain-core>=0.3.0",
+    "langchain>=0.3.0",
+    "langgraph>=1.0.0",
+    "typing-extensions>=4.0.0",
 ]
 
 [project.optional-dependencies]
