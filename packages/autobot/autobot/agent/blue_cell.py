@@ -33,13 +33,14 @@ from autobot.agent.middleware.budget import TokenBudgetMiddleware
 from autobot.agent.middleware.prompt_injection_shield import PromptInjectionShieldMiddleware
 from autobot.agent.middleware.untrusted_output import UntrustedOutputMiddleware
 from autobot.agent.models import build_model
-from autobot.agent.tools.blue_sensor import (
+from autobot.agent.tools.blue_sensor import (  # noqa: F401 — re-exported for the spec
     blue_sensor_body,
     blue_sensor_events,
     blue_sensor_scan,
     blue_sensor_search,
     blue_sensor_timeline,
 )
+from decepticon_core.plugin_loader import SubAgentSpec
 
 _ROLE = "blue_cell"
 _RECURSION_LIMIT = 120
@@ -106,6 +107,23 @@ def create_blue_cell_agent(
         middleware=middleware,
         name=_ROLE,
     ).with_config({"recursion_limit": recursion_limit or _RECURSION_LIMIT})
+
+
+# The red orchestrator dispatches blue_cell as a subagent (the purple loop):
+# discovered via the ``decepticon.subagents`` entry-point declared in this
+# package's metadata. parent_agents pins it to the ``decepticon`` main agent.
+SUBAGENT_SPEC = SubAgentSpec(
+    name="blue_cell",
+    description=(
+        "Blue Cell — independent read-only defender. Investigates live local "
+        "target telemetry and the always-on monitor's incidents, then reports "
+        "evidence and uncertainty. No bash or containment tools."
+    ),
+    factory=create_blue_cell_agent,
+    parent_agents=("decepticon",),
+    bundle="standard",
+    priority=90,
+)
 
 
 def __getattr__(name: str):

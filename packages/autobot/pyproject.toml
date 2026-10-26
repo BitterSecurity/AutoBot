@@ -75,6 +75,11 @@ opensearch = "autobot.stores.opensearch_store:OpenSearchEventStore"
 [project.entry-points."decepticon.agents"]
 blue_cell = "autobot.agent.blue_cell:graph"
 
+# The red orchestrator dispatches blue_cell as a subagent when this package
+# is installed (``decepticon[blue]``) — the purple loop's defender side.
+[project.entry-points."decepticon.subagents"]
+blue_cell = "autobot.agent.blue_cell:SUBAGENT_SPEC"
+
 [project.urls]
 Homepage = "https://github.com/BitterSecurity/AutoBot"
 Repository = "https://github.com/BitterSecurity/AutoBot"
