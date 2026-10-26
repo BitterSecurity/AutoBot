@@ -1,5 +1,8 @@
 [project]
-name = "autobot"
+# PyPI distribution name — the bare ``autobot`` name is already taken on
+# PyPI by an unrelated project, so the short namespace form is used. The
+# import package remains ``autobot``.
+name = "bs-autobot"
 # Sentinel — replaced with the git tag at build time, in lockstep with the
 # rest of the workspace. See containers/langgraph.Dockerfile and the
 # release workflow.
@@ -43,7 +46,6 @@ dependencies = [
     "langchain-core>=0.3.0",
     "langchain>=0.3.0",
     "langgraph>=1.0.0",
-    "langchain-litellm>=0.9.0",
     "langchain-openai>=0.3.0",
     "langchain-anthropic>=0.3.0",
     "deepagents>=0.3.0",

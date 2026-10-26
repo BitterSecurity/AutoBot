@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from autobot.agent.blue_cell import (
+    build_model,
     create_blue_cell_agent,
     default_middleware,
     default_tools,
@@ -59,11 +60,9 @@ def test_system_prompt_carries_the_identity_and_readonly_contract() -> None:
 
 
 def test_default_middleware_order_matches_the_design(monkeypatch: pytest.MonkeyPatch) -> None:
-    from langchain_litellm import ChatLiteLLM
-
     monkeypatch.setenv("AUTOBOT_MODEL", "anthropic/claude-sonnet-4")
     monkeypatch.setenv("AUTOBOT_BUDGET_TOKENS", "0")
-    model = ChatLiteLLM(model="anthropic/claude-sonnet-4")  # construction only, no calls
+    model = build_model()  # ChatAnthropic — construction only, no calls
     order = [type(m).__name__ for m in default_middleware(model)]
     assert order == [
         "UntrustedOutputMiddleware",

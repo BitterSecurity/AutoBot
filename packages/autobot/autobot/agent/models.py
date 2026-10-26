@@ -9,8 +9,10 @@ AutoBot does not duplicate that configuration:
    ``/v1``) with the model the stack stamps for blue. Provider keys and model
    routing live in the proxy — the user's Decepticon LLM settings are reused,
    never configured twice.
-2. **Standalone mode** — ``AUTOBOT_MODEL`` builds a ChatModel directly through
-   the LiteLLM SDK (``ChatLiteLLM``), provider keys in the standard env.
+2. **Standalone mode** — ``AUTOBOT_MODEL`` builds a ChatModel via langchain's
+   ``init_chat_model`` (provider packages as optional extras; the LiteLLM-SDK
+   construction was dropped because ``langchain-litellm`` transitively forces
+   ``mcp>=2``, conflicting with the Decepticon MCP server's ``mcp<2`` pin).
 
 Resolution order: shared gateway (if fully configured) → standalone
 ``AUTOBOT_MODEL`` → fail-closed with guidance covering both modes.
@@ -37,7 +39,7 @@ import os
 import re
 from typing import Any
 
-from langchain_litellm import ChatLiteLLM
+from langchain.chat_models import init_chat_model
 
 _MODEL_ENV = "AUTOBOT_MODEL"
 _FALLBACK_ENV = "AUTOBOT_FALLBACK_MODELS"
@@ -73,10 +75,19 @@ def _temperature() -> float | None:
 
 
 def _build_chat(model: str, temperature: float | None) -> Any:
-    kwargs: dict[str, Any] = {"model": model}
+    # langchain's universal constructor. The LiteLLM-style ``provider/model``
+    # prefix is split: the provider selects the integration (whose package
+    # must be installed — autobot[openai], autobot[anthropic], ...) and the
+    # rest is the provider-native model name. Custom gateways (an Elice-served
+    # model behind a LiteLLM proxy) go through the shared-gateway mode —
+    # provider-agnostic.
+    provider, _, name = model.partition("/")
+    kwargs: dict[str, Any] = (
+        {"model": name, "model_provider": provider} if name else {"model": model}
+    )
     if temperature is not None:
         kwargs["temperature"] = temperature
-    return ChatLiteLLM(**kwargs)
+    return init_chat_model(**kwargs)
 
 
 _GATEWAY_PROXY_ENV = "DECEPTICON_LLM__PROXY_URL"

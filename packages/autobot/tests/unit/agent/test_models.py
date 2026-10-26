@@ -16,10 +16,11 @@ def test_missing_model_fails_closed_with_guidance() -> None:
         build_model()
 
 
-def test_primary_only_builds_chatlitellm(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_primary_builds_provider_chat_model(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AUTOBOT_MODEL", "anthropic/claude-sonnet-4")
     model = build_model()
-    assert type(model).__name__ == "ChatLiteLLM"
+    # init_chat_model dispatches by the provider prefix.
+    assert type(model).__name__ == "ChatAnthropic"
 
 
 def test_fallback_models_parse_from_commas_and_spaces(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -31,7 +32,7 @@ def test_fallback_models_parse_from_commas_and_spaces(monkeypatch: pytest.Monkey
 
 def test_fallbacks_attach_natively(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AUTOBOT_MODEL", "anthropic/claude-sonnet-4")
-    monkeypatch.setenv("AUTOBOT_FALLBACK_MODELS", "openai/gpt-4o")
+    monkeypatch.setenv("AUTOBOT_FALLBACK_MODELS", "anthropic/claude-haiku-4-5")
     model = build_model()
     from langchain_core.runnables import RunnableWithFallbacks
 
