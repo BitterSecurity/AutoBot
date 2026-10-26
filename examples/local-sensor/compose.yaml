@@ -73,6 +73,28 @@ services:
     restart: unless-stopped
     networks: [blue-net, query-net]
 
+  autobot-agent:
+    build:
+      context: ../..
+      dockerfile: containers/langgraph.Dockerfile
+    image: autobot-langgraph:3.13.8
+    environment:
+      AUTOBOT_MODEL: ${AUTOBOT_MODEL:-}
+      AUTOBOT_FALLBACK_MODELS: ${AUTOBOT_FALLBACK_MODELS:-}
+      AUTOBOT_BUDGET_TOKENS: ${AUTOBOT_BUDGET_TOKENS:-400000}
+      BLUE_SENSOR_URL: http://blue-receiver:8082
+      BLUE_MONITOR_URL: http://blue-monitor:8085
+    ports:
+      - "127.0.0.1:18082:2024"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:2024/ok')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
+    networks: [blue-net, query-net]
+
   blue-monitor:
     build:
       context: .

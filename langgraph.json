@@ -1,0 +1,11 @@
+{
+  "dependencies": ["./packages/autobot"],
+  "graphs": {
+    "blue_cell": "./packages/autobot/autobot/agent/blue_cell.py:graph"
+  },
+  "env": ".env",
+  "python_version": "3.13",
+  "http": {
+    "multitask_strategy": "interrupt"
+  }
+}
