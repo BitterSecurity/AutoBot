@@ -70,7 +70,7 @@ opensearch = "autobot.stores.opensearch_store:OpenSearchEventStore"
 # ``decepticon[blue]`` extra installs this package, so the blue agent is
 # hosted by the Decepticon LangGraph server without in-tree blue code
 # (migration plan stage 2c; Decepticon design doc §0.5 client guarantee).
-[project.entry-points."decepticon.graphs"]
+[project.entry-points."decepticon.agents"]
 blue_cell = "autobot.agent.blue_cell:graph"
 
 [project.urls]

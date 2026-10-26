@@ -108,6 +108,11 @@ def create_blue_cell_agent(
     ).with_config({"recursion_limit": recursion_limit or _RECURSION_LIMIT})
 
 
-def graph():
-    """LangGraph Platform export: called by the server at startup."""
-    return create_blue_cell_agent()
+def __getattr__(name: str):
+    # Module-level lazy graph attribute — the Decepticon graph registry's
+    # ``decepticon.agents`` discovery contract requires a module-level
+    # ``graph`` attribute ("module:graph"); PEP 562 defers the model env
+    # read from import time to attribute resolution time.
+    if name == "graph":
+        return create_blue_cell_agent()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
