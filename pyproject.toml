@@ -41,8 +41,9 @@ known-first-party = ["autobot", "decepticon_core"]
 
 [tool.ruff.lint.per-file-ignores]
 # Scope banned-api to the contract layer only — the AutoBot agent runtime
-# (2b) legitimately uses langgraph / httpx.
+# (2b) legitimately uses langchain / langgraph / httpx.
 "packages/autobot/autobot/triage/**" = ["TID251"]
+"packages/autobot/autobot/agent/**" = ["TID251"]
 "packages/autobot/tests/**" = ["TID251"]
 
 [tool.pytest.ini_options]
