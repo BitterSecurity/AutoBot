@@ -1,0 +1,17 @@
+title: AutoBot HTTP path traversal attempt
+id: 6f3a9c2e-1d4b-4c8a-9e7f-a0b1c2d3e4f5
+status: experimental
+description: Detects directory traversal sequences in HTTP access requests (OCSF-normalized)
+author: AutoBot
+date: 2026/10/26
+tags:
+  - attack.initial_access
+  - attack.t1190
+logsource:
+  product: autobot_ocsf
+detection:
+  selection:
+    event_type: http_access
+    message|contains: '../'
+  condition: selection
+level: high
