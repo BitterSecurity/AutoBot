@@ -1,6 +1,6 @@
-"""The blue_cell investigation agent — AutoBot's own graph export.
+"""The AutoBot investigation agent — the graph export.
 
-Adapted from Decepticon's ``agents/standard/blue_cell.py``: same read-only
+Adapted from the Decepticon in-tree prototype: same read-only
 tool set and prompt, but the framework dependencies are replaced by AutoBot's
 own runtime — the thin LiteLLM-direct model factory (``agent.models``) and
 the directly-assembled middleware list (no slot registry):
@@ -42,7 +42,7 @@ from autobot.agent.tools.blue_sensor import (  # noqa: F401 — re-exported for 
 )
 from decepticon_core.plugin_loader import SubAgentSpec
 
-_ROLE = "blue_cell"
+_ROLE = "autobot"
 _RECURSION_LIMIT = 120
 
 _STANDARD_TOOLS: list[Any] = [
@@ -55,8 +55,8 @@ _STANDARD_TOOLS: list[Any] = [
 
 
 def load_system_prompt() -> str:
-    """Load the blue_cell system prompt from the packaged prompts dir."""
-    resource = resources.files("autobot.agent").joinpath("prompts/blue_cell.md")
+    """Load the AutoBot system prompt from the packaged prompts dir."""
+    resource = resources.files("autobot.agent").joinpath("prompts/autobot.md")
     return resource.read_text(encoding="utf-8")
 
 
@@ -71,7 +71,7 @@ def default_middleware(model: Any) -> list[Any]:
         UntrustedOutputMiddleware(),
         PromptInjectionShieldMiddleware(append_policy_to_system=False),
         TokenBudgetMiddleware(),
-        # blue_cell has no sandbox: summaries land in graph state, not on
+        # AutoBot has no sandbox: summaries land in graph state, not on
         # a filesystem (the deepagents StateBackend is the in-memory one).
         create_summarization_middleware(model=model, backend=StateBackend()),
         AnthropicPromptCachingMiddleware(),
@@ -79,7 +79,7 @@ def default_middleware(model: Any) -> list[Any]:
     ]
 
 
-def create_blue_cell_agent(
+def create_autobot_agent(
     *,
     model: Any = None,
     tools: list[Any] | None = None,
@@ -109,17 +109,17 @@ def create_blue_cell_agent(
     ).with_config({"recursion_limit": recursion_limit or _RECURSION_LIMIT})
 
 
-# The red orchestrator dispatches blue_cell as a subagent (the purple loop):
+# The red orchestrator dispatches AutoBot as a subagent (the purple loop):
 # discovered via the ``decepticon.subagents`` entry-point declared in this
 # package's metadata. parent_agents pins it to the ``decepticon`` main agent.
 SUBAGENT_SPEC = SubAgentSpec(
-    name="blue_cell",
+    name="autobot",
     description=(
-        "Blue Cell — independent read-only defender. Investigates live local "
+        "AutoBot — independent read-only defender. Investigates live local "
         "target telemetry and the always-on monitor's incidents, then reports "
         "evidence and uncertainty. No bash or containment tools."
     ),
-    factory=create_blue_cell_agent,
+    factory=create_autobot_agent,
     parent_agents=("decepticon",),
     bundle="standard",
     priority=90,
@@ -132,5 +132,5 @@ def __getattr__(name: str):
     # ``graph`` attribute ("module:graph"); PEP 562 defers the model env
     # read from import time to attribute resolution time.
     if name == "graph":
-        return create_blue_cell_agent()
+        return create_autobot_agent()
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

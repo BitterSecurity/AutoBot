@@ -202,7 +202,7 @@ def test_skill_loader_name_resolved_from_registry():
 
 def test_skill_registries_absent_uses_documented_fallback():
     # AutoBot has no skills registries (decepticon.tools.skills / skillogy are
-    # not installed and blue_cell declares no SKILLS slot). The resolver's
+    # not installed and AutoBot declares no SKILLS slot). The resolver's
     # guarded imports fail and the documented fallback keeps the historical
     # skill-tool names trusted — AutoBot's actual steady state.
     _skill_tool_names.cache_clear()

@@ -73,12 +73,12 @@ opensearch = "autobot.stores.opensearch_store:OpenSearchEventStore"
 # hosted by the Decepticon LangGraph server without in-tree blue code
 # (migration plan stage 2c; Decepticon design doc §0.5 client guarantee).
 [project.entry-points."decepticon.agents"]
-blue_cell = "autobot.agent.blue_cell:graph"
+autobot = "autobot.agent.autobot:graph"
 
 # The red orchestrator dispatches blue_cell as a subagent when this package
 # is installed (``decepticon[blue]``) — the purple loop's defender side.
 [project.entry-points."decepticon.subagents"]
-blue_cell = "autobot.agent.blue_cell:SUBAGENT_SPEC"
+autobot = "autobot.agent.autobot:SUBAGENT_SPEC"
 
 [project.urls]
 Homepage = "https://github.com/BitterSecurity/AutoBot"
