@@ -22,3 +22,12 @@ full architecture.
 ## Status
 
 Phase 1 (contracts + substrate) in progress. Apache-2.0.
+
+## Client admission metadata
+
+The installed `bs-autobot` package contributes an `observation` role through
+`decepticon.roles`, alongside its agent/subagent entry points. Clients can identify
+the read-only investigator without treating it as an execution role requiring an
+attack scope. AutoBot still owns its middleware and five read-only sensor tools;
+this declaration does not grant mutation or execution capabilities. Unknown roles
+retain the shared core's conservative execution default.

@@ -68,10 +68,11 @@ testing = ["pytest>=8.0.0"]
 [project.entry-points."decepticon.event_stores"]
 opensearch = "autobot.stores.opensearch_store:OpenSearchEventStore"
 
-# The blue_cell graph export — discovered by the Decepticon server when the
-# ``decepticon[blue]`` extra installs this package, so the blue agent is
-# hosted by the Decepticon LangGraph server without in-tree blue code
-# (migration plan stage 2c; Decepticon design doc §0.5 client guarantee).
+# Trusted client admission metadata; the agent owns its read-only middleware.
+[project.entry-points."decepticon.roles"]
+autobot = "autobot.role:ROLE_SPEC"
+
+# The optional AutoBot graph is discovered without in-tree Blue implementations.
 [project.entry-points."decepticon.agents"]
 autobot = "autobot.agent.autobot:graph"
 
