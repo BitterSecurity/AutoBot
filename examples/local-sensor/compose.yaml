@@ -82,8 +82,19 @@ services:
       AUTOBOT_MODEL: ${AUTOBOT_MODEL:-}
       AUTOBOT_FALLBACK_MODELS: ${AUTOBOT_FALLBACK_MODELS:-}
       AUTOBOT_BUDGET_TOKENS: ${AUTOBOT_BUDGET_TOKENS:-400000}
+      # Shared gateway (Decepticon co-deploy): the stack's LiteLLM proxy
+      # carries the operator's provider keys and model routing — configured
+      # once, reused here (see agent-runtime design §LLM layer).
+      DECEPTICON_LLM__PROXY_URL: ${DECEPTICON_LLM__PROXY_URL:-}
+      DECEPTICON_LLM__PROXY_API_KEY: ${DECEPTICON_LLM__PROXY_API_KEY:-}
+      DECEPTICON_BLUE_MODEL: ${DECEPTICON_BLUE_MODEL:-}
       BLUE_SENSOR_URL: http://blue-receiver:8082
       BLUE_MONITOR_URL: http://blue-monitor:8085
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # Co-deploy: attach to the Decepticon stack's network so the agent calls
+    # the shared LiteLLM gateway by container name (the proxy publishes on
+    # host loopback only, which containers cannot reach).
     ports:
       - "127.0.0.1:18082:2024"
     healthcheck:
@@ -93,7 +104,11 @@ services:
       retries: 10
       start_period: 60s
     restart: unless-stopped
-    networks: [blue-net, query-net]
+    networks:
+      blue-net:
+      query-net:
+      decepticon-gateway:
+        aliases: [autobot-agent]
 
   blue-monitor:
     build:
@@ -135,6 +150,9 @@ networks:
   target-net:
     internal: true
   query-net:
+  decepticon-gateway:
+    name: decepticon_decepticon-net
+    external: true
 
 volumes:
   sensor-logs:
