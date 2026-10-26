@@ -1,24 +1,34 @@
-"""Thin model factory — LiteLLM SDK direct, no proxy gateway.
+"""Thin model factory — two modes, sharing the operator's LLM configuration.
 
-Decepticon's LLMFactory (1784 lines) routes every model through a LiteLLM
-proxy service with a credentials inventory, model profiles and a multi-tenant
-virtual-key layer. That is Decepticon's multi-agent/multi-tenant
-infrastructure. AutoBot standalone needs one model (plus fallbacks) with
-provider keys in the environment — so this factory constructs ChatModels
-directly through the LiteLLM SDK via ``ChatLiteLLM``, and attaches provider
-fallbacks natively with ``Runnable.with_fallbacks`` (no fallback middleware
-needed).
+Decepticon's LLMFactory (1784 lines) routes every model through the LiteLLM
+proxy gateway with a credentials inventory and multi-tenant virtual keys.
+AutoBot does not duplicate that configuration:
 
-Configuration (fail-closed):
-    AUTOBOT_MODEL             primary model, LiteLLM format
-                              (e.g. ``anthropic/claude-...``, ``openai/gpt-...``,
-                              ``ollama/qwen...``). Required.
+1. **Shared-gateway mode (Decepticon co-deploy)** — when the Decepticon
+   stack's LiteLLM proxy is reachable, the agent calls it (OpenAI-compatible
+   ``/v1``) with the model the stack stamps for blue. Provider keys and model
+   routing live in the proxy — the user's Decepticon LLM settings are reused,
+   never configured twice.
+2. **Standalone mode** — ``AUTOBOT_MODEL`` builds a ChatModel directly through
+   the LiteLLM SDK (``ChatLiteLLM``), provider keys in the standard env.
+
+Resolution order: shared gateway (if fully configured) → standalone
+``AUTOBOT_MODEL`` → fail-closed with guidance covering both modes.
+
+Gateway configuration (co-deployed with Decepticon):
+    DECEPTICON_LLM__PROXY_URL     the stack's LiteLLM gateway (e.g.
+                                  ``http://litellm:4000``)
+    DECEPTICON_LLM__PROXY_API_KEY gateway bearer key (may be empty on
+                                  internal networks)
+    DECEPTICON_BLUE_MODEL         the model slug to route blue through
+                                  (stamped by the stack / operator, in the
+                                  proxy's provider-slug format)
+
+Standalone configuration:
+    AUTOBOT_MODEL             primary model, LiteLLM format. Required in
+                              standalone mode.
     AUTOBOT_FALLBACK_MODELS   ordered fallback models, comma/space separated.
-                              Optional (empty = no fallbacks).
     AUTOBOT_TEMPERATURE       sampling temperature. Optional (provider default).
-
-Provider keys go through the provider's standard environment variables
-(``ANTHROPIC_API_KEY``, ``OPENAI_API_KEY``, ...) as handled by the LiteLLM SDK.
 """
 
 from __future__ import annotations
@@ -69,13 +79,44 @@ def _build_chat(model: str, temperature: float | None) -> Any:
     return ChatLiteLLM(**kwargs)
 
 
-def build_model() -> Any:
-    """Build the configured primary ChatModel with native provider fallbacks.
+_GATEWAY_PROXY_ENV = "DECEPTICON_LLM__PROXY_URL"
+_GATEWAY_KEY_ENV = "DECEPTICON_LLM__PROXY_API_KEY"
+_GATEWAY_MODEL_ENV = "DECEPTICON_BLUE_MODEL"
 
-    Fail-closed: a missing ``AUTOBOT_MODEL`` raises with setup guidance;
-    malformed ``AUTOBOT_TEMPERATURE`` raises rather than silently defaulting.
+
+def _gateway_config() -> tuple[str, str, str] | None:
+    """Return (proxy_url, key, model) when the shared gateway is configured."""
+    proxy_url = os.environ.get(_GATEWAY_PROXY_ENV, "").strip()
+    model = os.environ.get(_GATEWAY_MODEL_ENV, "").strip()
+    if not (proxy_url and model):
+        return None
+    key = os.environ.get(_GATEWAY_KEY_ENV, "").strip()
+    return proxy_url, key, model
+
+
+def _build_gateway_chat(proxy_url: str, key: str, model: str) -> Any:
+    from langchain_openai import ChatOpenAI
+
+    # The LiteLLM proxy exposes the OpenAI-compatible /v1 API — the standard
+    # client for an OpenAI-compatible gateway.
+    return ChatOpenAI(
+        model=model,
+        base_url=f"{proxy_url.rstrip('/')}/v1",
+        api_key=key or "internal-gateway-no-key",
+    )
+
+
+def build_model() -> Any:
+    """Build the configured model with native provider fallbacks.
+
+    Resolution: shared gateway (Decepticon co-deploy) → standalone
+    ``AUTOBOT_MODEL`` → fail-closed with setup guidance covering both.
     """
     temperature = _temperature()
+    gateway = _gateway_config()
+    if gateway is not None:
+        proxy_url, key, model = gateway
+        return _build_gateway_chat(proxy_url, key, model)
     primary = _build_chat(_required_model(), temperature)
     fallbacks = [_build_chat(model, temperature) for model in _fallback_models()]
     if fallbacks:

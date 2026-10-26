@@ -80,9 +80,18 @@ examples/local-sensor/compose.yaml  # + autobot-agent service (BLUE_AGENT_URL de
   at any other compatible server (including a Decepticon one during
   transition).
 - The Decepticon TUI's blue **chat** keeps two paths per the migration
-  guarantee (§0.5): `decepticon[blue]` registers the graph on the Decepticon
-  server, or the TUI points its blue agent base URL at the AutoBot server
-  (routing detail finalized when the server ships).
+  guarantee (§0.5): `decepticon[blue]` installs this package and the
+  Decepticon server **imports it** — the graph is discovered via the
+  `decepticon.graphs` entry-point declared in `packages/autobot/pyproject.toml`
+  (`blue_cell = "autobot.agent.blue_cell:graph"`; verified discoverable via
+  importlib.metadata) — or the TUI points its blue agent base URL at the
+  AutoBot server (routing detail finalized when the server ships).
+- **Dependency direction is one-way**: autobot depends on `decepticon-core`
+  (shared contracts, tier system, label validation) and NEVER on the
+  Decepticon framework; Decepticon imports autobot through the extra. Shared
+  LLM configuration travels the same direction — the gateway mode reads the
+  Decepticon stack's LiteLLM proxy env, so the operator's LLM settings are
+  configured once.
 - The blue_cell system prompt (blue_cell.md) moves to AutoBot and is loaded by
   AutoBot's own prompt loader; Decepticon's copy stays until 2c.
 
