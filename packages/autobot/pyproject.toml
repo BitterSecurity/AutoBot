@@ -44,6 +44,7 @@ dependencies = [
     "langchain>=0.3.0",
     "langgraph>=1.0.0",
     "langchain-litellm>=0.9.0",
+    "langchain-openai>=0.3.0",
     "langchain-anthropic>=0.3.0",
     "deepagents>=0.3.0",
     "httpx>=0.28.0",
@@ -64,6 +65,13 @@ testing = ["pytest>=8.0.0"]
 # ``autobot`` is installed alongside it (``decepticon[blue]``).
 [project.entry-points."decepticon.event_stores"]
 opensearch = "autobot.stores.opensearch_store:OpenSearchEventStore"
+
+# The blue_cell graph export — discovered by the Decepticon server when the
+# ``decepticon[blue]`` extra installs this package, so the blue agent is
+# hosted by the Decepticon LangGraph server without in-tree blue code
+# (migration plan stage 2c; Decepticon design doc §0.5 client guarantee).
+[project.entry-points."decepticon.graphs"]
+blue_cell = "autobot.agent.blue_cell:graph"
 
 [project.urls]
 Homepage = "https://github.com/BitterSecurity/AutoBot"
