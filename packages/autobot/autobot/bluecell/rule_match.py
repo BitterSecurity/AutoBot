@@ -23,8 +23,9 @@ from __future__ import annotations
 import json
 import logging
 import re
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -67,7 +68,16 @@ class DetectionEvent:
         return max(0.0, self.detection_ts - self.event_ts)
 
 
+@lru_cache(maxsize=1024)
 def _compile_pattern(raw: str) -> re.Pattern[str]:
+    """Compile a field pattern once and memoize it.
+
+    Patterns come from a bounded rule set and recur on every tap event,
+    so the ``lru_cache`` turns per-event recompilation into a single
+    compile per distinct pattern string. Semantically identical to a
+    bare ``re.compile`` — the same raw string always yields an equal
+    (here: identical, cached) ``re.Pattern``.
+    """
     if raw.startswith("re:"):
         return re.compile(raw[3:], re.IGNORECASE)
     return re.compile(re.escape(raw), re.IGNORECASE)
@@ -87,68 +97,123 @@ def _event_field(event: dict[str, Any], dotted: str) -> str:
     return str(cur)
 
 
-def _selection_matches(
-    selection: dict[str, str], event: dict[str, Any]
+# A precompiled selection: the dotted field path paired with its compiled
+# pattern, so the hot path never re-compiles or re-reads the raw rule.
+_CompiledSelection = tuple[tuple[str, re.Pattern[str]], ...]
+# Evaluates a rule's boolean condition given each selection's match result.
+_ConditionFn = Callable[[dict[str, bool]], bool]
+
+
+def _apply_selection(
+    fields: _CompiledSelection, event: dict[str, Any]
 ) -> tuple[bool, dict[str, str]]:
     matched: dict[str, str] = {}
-    for field_name, raw_pattern in selection.items():
-        pattern = _compile_pattern(raw_pattern)
-        value = _event_field(event, field_name)
-        m = pattern.search(value)
+    for field_name, pattern in fields:
+        m = pattern.search(_event_field(event, field_name))
         if not m:
             return False, {}
         matched[field_name] = m.group(0)
     return True, matched
 
 
+@lru_cache(maxsize=512)
+def _compile_condition(condition: str, known_names: frozenset[str]) -> _ConditionFn:
+    """Compile a selection-name condition once into a reusable evaluator.
+
+    The token structure of a condition is fixed per rule; only the
+    per-selection boolean *results* change between events. So the parse
+    (and the ``compile`` of the boolean expression) is hoisted out of the
+    per-event path and memoized here, keyed by the condition text and the
+    rule's selection names (which determine which tokens are "unknown").
+
+    Semantics mirror the previous ``_evaluate_condition`` exactly:
+    ``and``/``or``/``not`` and parentheses are honored; an empty condition
+    means "every selection must match"; a token naming a selection the rule
+    did not declare makes the whole rule misauthored and never fire.
+    """
+    if not condition.strip():
+        return lambda results: all(results.values()) if results else False
+
+    expr_parts: list[str] = []
+    for token in condition.split():
+        token_clean = token.strip("()")
+        if token_clean.lower() in {"and", "or", "not"} and token_clean == token:
+            expr_parts.append(token_clean.lower())
+        elif token in {"(", ")"}:
+            expr_parts.append(token)
+        elif token_clean in known_names:
+            # Reference the live result instead of baking in a value, so the
+            # compiled expression is reusable across events.
+            expr_parts.append(token.replace(token_clean, f"results[{token_clean!r}]"))
+        else:
+            # Unknown selection name — the rule can never fire (matches the
+            # historical "return False" behavior), so short-circuit.
+            return lambda results: False
+
+    expr = " ".join(expr_parts)
+    try:
+        code = compile(expr, "<rule-condition>", "eval")
+    except SyntaxError:
+        log.warning("rule_match: bad condition %r", condition)
+        return lambda results: False
+
+    def _evaluate(results: dict[str, bool]) -> bool:
+        try:
+            # nosec B307 - sandboxed: empty __builtins__, and only
+            # ``and``/``or``/``not``/parens/``results[<name>]`` (names are
+            # the rule's own declared selections) reach the compiled expr.
+            return bool(eval(code, {"__builtins__": {}}, {"results": results}))
+        except Exception:
+            log.warning("rule_match: bad condition %r", condition)
+            return False
+
+    return _evaluate
+
+
 def _evaluate_condition(condition: str, selection_results: dict[str, bool]) -> bool:
     """Boolean evaluation of a selection-name condition.
 
-    Handles ``and``, ``or``, ``not``, parentheses. Unknown selection
-    names evaluate to ``False`` (the rule was misauthored).
+    Thin wrapper preserved for backward compatibility; the compiled form in
+    :func:`_compile_condition` is the single source of truth.
     """
-    if not condition.strip():
-        return all(selection_results.values()) if selection_results else False
-    tokens = condition.split()
-    eval_expr_parts: list[str] = []
-    for token in tokens:
-        token_clean = token.strip("()")
-        if token_clean.lower() in {"and", "or", "not"} and token_clean == token:
-            eval_expr_parts.append(token_clean.lower())
-        elif token in {"(", ")"}:
-            eval_expr_parts.append(token)
-        elif token_clean in selection_results:
-            wrapped = token.replace(token_clean, str(selection_results[token_clean]))
-            eval_expr_parts.append(wrapped)
-        else:
-            return False
-    expr = " ".join(eval_expr_parts)
-    try:
-        return bool(eval(expr, {"__builtins__": {}}, {}))  # nosec B307 - sandboxed: empty __builtins__ + empty locals, only ``True``/``False``/``and``/``or``/``not``/``(``/``)`` reach the eval per the token whitelist above
-    except Exception:
-        log.warning("rule_match: bad condition %r", condition)
-        return False
+    return _compile_condition(condition, frozenset(selection_results))(selection_results)
 
 
 class RuleMatcher:
-    """Evaluate a set of rules against tap events."""
+    """Evaluate a set of rules against tap events.
+
+    Patterns and conditions are compiled once at construction, so
+    :meth:`match` — called once per tap event — does no regex compilation
+    or condition parsing in its hot loop.
+    """
 
     def __init__(self, rules: Iterable[DetectionRule]) -> None:
         self._rules = list(rules)
+        self._compiled: list[tuple[DetectionRule, tuple[tuple[str, _CompiledSelection], ...], _ConditionFn]] = []
+        for rule in self._rules:
+            selections = tuple(
+                (
+                    name,
+                    tuple((field_name, _compile_pattern(raw)) for field_name, raw in sel.items()),
+                )
+                for name, sel in rule.selections.items()
+            )
+            condition = _compile_condition(rule.condition, frozenset(rule.selections))
+            self._compiled.append((rule, selections, condition))
 
     def match(self, event: dict[str, Any], now_ts: float) -> list[DetectionEvent]:
         """Return every rule that fires on ``event``."""
         hits: list[DetectionEvent] = []
         event_ts = float(event.get("ts", now_ts))
-        for rule in self._rules:
+        for rule, selections, condition in self._compiled:
             selection_results: dict[str, bool] = {}
             matched_fields: dict[str, str] = {}
-            for name, sel in rule.selections.items():
-                ok, fields = _selection_matches(sel, event)
+            for name, fields in selections:
+                ok, fmatched = _apply_selection(fields, event)
                 selection_results[name] = ok
                 if ok:
-                    matched_fields.update({f"{name}.{k}": v for k, v in fields.items()})
-            if _evaluate_condition(rule.condition, selection_results):
+                    matched_fields.update({f"{name}.{k}": v for k, v in fmatched.items()})
+            if condition(selection_results):
                 hits.append(
                     DetectionEvent(
                         rule=rule,
