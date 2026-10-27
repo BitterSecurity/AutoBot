@@ -41,7 +41,6 @@ from autobot.agent.tools.blue_sensor import (  # noqa: F401 — re-exported for 
     blue_sensor_search,
     blue_sensor_timeline,
 )
-from decepticon_core.plugin_loader import SubAgentSpec
 
 _ROLE = "autobot"
 _RECURSION_LIMIT = 400
@@ -113,23 +112,6 @@ def create_autobot_agent(
         middleware=middleware,
         name=_ROLE,
     ).with_config({"recursion_limit": recursion_limit or _RECURSION_LIMIT})
-
-
-# The red orchestrator dispatches AutoBot as a subagent (the purple loop):
-# discovered via the ``decepticon.subagents`` entry-point declared in this
-# package's metadata. parent_agents pins it to the ``decepticon`` main agent.
-SUBAGENT_SPEC = SubAgentSpec(
-    name="autobot",
-    description=(
-        "AutoBot — independent read-only defender. Investigates live local "
-        "target telemetry and the always-on monitor's incidents, then reports "
-        "evidence and uncertainty. No bash or containment tools."
-    ),
-    factory=create_autobot_agent,
-    parent_agents=("decepticon",),
-    bundle="standard",
-    priority=90,
-)
 
 
 def __getattr__(name: str):
