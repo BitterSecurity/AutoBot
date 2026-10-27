@@ -108,7 +108,7 @@ testing = [
 
 [package.metadata]
 requires-dist = [
-    { name = "decepticon-core", specifier = ">=2.1.0" },
+    { name = "decepticon-core" },
     { name = "deepagents", specifier = ">=0.3.0" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "langchain", specifier = ">=0.3.0" },
