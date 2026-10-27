@@ -129,6 +129,10 @@ SUBAGENT_SPEC = SubAgentSpec(
     parent_agents=("decepticon",),
     bundle="standard",
     priority=90,
+    # The purple loop dispatches AutoBot for bounded investigations — the
+    # orchestrator hands out a tighter step budget than the standalone
+    # server run (400) so a dispatched investigation converges.
+    recursion_limit=200,
 )
 
 
