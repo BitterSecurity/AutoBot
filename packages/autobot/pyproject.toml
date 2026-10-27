@@ -78,10 +78,6 @@ autobot = "autobot.role:ROLE_SPEC"
 [project.entry-points."decepticon.agents"]
 autobot = "autobot.agent.autobot:graph"
 
-# The red orchestrator dispatches blue_cell as a subagent when this package
-# is installed (``decepticon[blue]``) — the purple loop's defender side.
-[project.entry-points."decepticon.subagents"]
-autobot = "autobot.agent.autobot:SUBAGENT_SPEC"
 
 [project.urls]
 Homepage = "https://github.com/BitterSecurity/AutoBot"
