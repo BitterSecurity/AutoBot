@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv build --package autobot
+      - run: uv build --package bs-autobot
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
 
