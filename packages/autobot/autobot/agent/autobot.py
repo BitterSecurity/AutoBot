@@ -31,6 +31,7 @@ from langchain_anthropic.middleware import AnthropicPromptCachingMiddleware
 
 from autobot.agent.middleware.budget import TokenBudgetMiddleware
 from autobot.agent.middleware.prompt_injection_shield import PromptInjectionShieldMiddleware
+from autobot.agent.middleware.step_budget import StepBudgetMiddleware
 from autobot.agent.middleware.untrusted_output import UntrustedOutputMiddleware
 from autobot.agent.models import build_model
 from autobot.agent.tools.blue_sensor import (  # noqa: F401 — re-exported for the spec
@@ -43,7 +44,7 @@ from autobot.agent.tools.blue_sensor import (  # noqa: F401 — re-exported for 
 from decepticon_core.plugin_loader import SubAgentSpec
 
 _ROLE = "autobot"
-_RECURSION_LIMIT = 120
+_RECURSION_LIMIT = 400
 
 _STANDARD_TOOLS: list[Any] = [
     blue_sensor_scan,
@@ -99,7 +100,12 @@ def create_autobot_agent(
     if system_prompt is None:
         system_prompt = load_system_prompt()
     if middleware is None:
-        middleware = default_middleware(model)
+        # StepBudgetMiddleware(total_steps) mirrors the with_config recursion
+        # limit — the agent knows its budget and wraps up before the hard stop.
+        middleware = [
+            *default_middleware(model),
+            StepBudgetMiddleware(total_steps=recursion_limit or _RECURSION_LIMIT),
+        ]
     return create_agent(
         model,
         system_prompt=system_prompt,
