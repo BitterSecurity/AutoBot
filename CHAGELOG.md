@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Proposed Blue Cell matcher performance fix (PR pending): precompile detection
+- Proposed Blue Cell matcher performance fix ([#21](https://github.com/BitterSecurity/AutoBot/pull/21)): precompile detection
   rule patterns and conditions once in `RuleMatcher`, instead of recompiling
   every regex and re-parsing every condition on each tap event. The per-event
   `match()` hot loop now does no `re.compile`/`eval` work. Behavior is
