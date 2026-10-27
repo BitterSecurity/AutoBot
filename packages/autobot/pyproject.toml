@@ -36,9 +36,11 @@ classifiers = [
 # framework runtime — so it installs and runs standalone (a defender need not
 # pull in the offensive agent). Red/Blue are composed by Cybertron on top.
 dependencies = [
-    # 2.1.0 is the first core release carrying the AutoBot contract layer
-    # (OCSF event envelope, EventStoreProtocol, CoverageAdapterProtocol).
-    "decepticon-core>=2.1.0",
+    # AutoBot and Decepticon ship in lockstep (release policy §2) — the
+    # contract layer is version-compatible by construction. Unpinned so the
+    # co-installed Decepticon workspace's sentinel-versioned member satisfies
+    # the requirement (uv rejects a 0.0.0 member against a >= floor).
+    "decepticon-core",
     "pydantic>=2.0.0",
     # Agent runtime (Phase 2b-ii): the middleware stack is LangChain-native
     # (AgentMiddleware), matching the Decepticon agent architecture. The
